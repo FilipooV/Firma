@@ -5,23 +5,14 @@ namespace Firma
         public Form1()
         {
             InitializeComponent();
+            OdczytZPliku();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
-        public class myNode
-        {
-            public string rodzic;
-            public string nazwa;
-
-            public myNode(string rodzic, string nazwa)
-            {
-                this.rodzic = rodzic;
-                this.nazwa = nazwa;
-            }
-        }
+        
         private void DodajDoListy(TreeNode node, ref List<myNode> lista)
         {
             if (node == null)
@@ -50,20 +41,17 @@ namespace Firma
             foreach (myNode elem in lista)
             {
                 text += elem.nazwa + " " + elem.rodzic + "\n";
-                File.WriteAllText("firma.txt", text);
             }
+            File.WriteAllText("firma.txt", text);
         }
         private void DodajGa³¹ŸToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form2 dialog = new Form2();
             dialog.Text = "Dodawanie ga³êzi";
 
-            
-
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 treeView1.Nodes.Add(dialog.nazwa);
-                
             }
         }
 
@@ -128,27 +116,28 @@ namespace Firma
             treeView1.Nodes.Clear();
             List<myNode> lista = new List<myNode>();
             string[] tab = File.ReadAllLines("firma.txt");
-            foreach(string elem in tab)
+            foreach (string elem in tab)
             {
                 string[] pom = elem.Split(' ');
-                lista.Add(new myNode(pom[1], pom[2]));
+                lista.Add(new myNode(pom[1], pom[0]));
             }
-            foreach(myNode node in lista)
+           
+            foreach (myNode node in lista)
             {
-                if (node.rodzic == "brak")
+                if (node.rodzic == "Brak")
                     treeView1.Nodes.Add(new TreeNode(node.nazwa));
                 else
                 {
-                  /*  //TreeNode rodzic = ZnajdzRodzica(node.rodzic);
+                    TreeNode rodzic = ZnajdzRodzica(treeView1.Nodes[0], node.rodzic);
                     if (rodzic != null)
-                        rodzic.Nodes.Add(node.nazwa);*/
+                        rodzic.Nodes.Add(node.nazwa);
                 }
             }
         }
-        private TreeNode ZnajdzRodzica(string rodzic)
+        /*private TreeNode ZnajdzRodzica(string rodzic)
         {
-            /* TreeNode ew = 
-             return null;*/
+            *//* TreeNode ew = 
+             return null;*//*
             string[] tab = File.ReadAllLines("firma.txt");
             foreach(string elem in tab)
             {
@@ -158,8 +147,34 @@ namespace Firma
             {
 
             }
+        }*/
+        private TreeNode ZnajdzRodzica(TreeNode node, string rodzic) {
+
+            TreeNode wynik = null;
+            if (node == null)
+                return null;
+            if (node.Text == rodzic)
+                return node;
+
+            if (node.NextNode != null)
+                wynik = ZnajdzRodzica(node.NextNode, rodzic);
+            if (node.GetNodeCount(true) > 0)
+                wynik = ZnajdzRodzica(node.FirstNode, rodzic);
+
+            return wynik;
         }
 
         
+    }
+    public class myNode
+    {
+        public string rodzic;
+        public string nazwa;
+
+        public myNode(string rodzic, string nazwa)
+        {
+            this.rodzic = rodzic;
+            this.nazwa = nazwa;
+        }
     }
 }
